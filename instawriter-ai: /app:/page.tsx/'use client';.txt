@@ -1,0 +1,60 @@
+'use client';
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+export default function InstaWriterAI() {
+  const [idea, setIdea] = useState('');
+  const [output, setOutput] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const generateContent = async () => {
+    setLoading(true);
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idea }),
+    });
+    const data = await response.json();
+    setOutput(data);
+    setLoading(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col items-center p-4">
+      <h1 className="text-4xl font-bold mt-10">InstaWriter AI</h1>
+      <p className="text-md text-gray-600 mt-2">Your AI-Powered Content Assistant for Instagram & TikTok</p>
+
+      <Card className="w-full max-w-xl mt-8 shadow-lg">
+        <CardContent className="p-6">
+          <p className="mb-2 text-sm font-semibold">Enter your post idea:</p>
+          <Input
+            placeholder="e.g., Benefits of drinking water"
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+          />
+          <Button className="mt-4 w-full" onClick={generateContent} disabled={loading}>
+            {loading ? "Generating..." : "Generate Content"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {output && (
+        <div className="w-full max-w-xl mt-6">
+          <h2 className="text-xl font-semibold mb-2">Generated Content:</h2>
+          <div className="bg-gray-100 rounded-xl p-4 space-y-2">
+            <p><strong>Caption:</strong> {output.caption}</p>
+            <p><strong>Hashtags:</strong> {output.hashtags}</p>
+            <p><strong>Hook:</strong> {output.hook}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-10 text-center">
+        <a href="https://whop.com/login" className="text-blue-600 underline">Login with Whop</a>
+        <p className="text-sm text-gray-500 mt-1">Start your free trial today</p>
+      </div>
+    </div>
+  );
+}

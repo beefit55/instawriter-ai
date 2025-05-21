@@ -1,0 +1,23 @@
+import { OpenAI } from "openai";
+
+export const runtime = "edge";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { idea } = await req.json();
+
+  const prompt = `Generate a caption, hashtags, and hook for an Instagram or TikTok post based on this idea: "${idea}".\\nReturn the result in this format:\\nCaption: ...\\nHashtags: ...\\nHook: ...`;
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const result = completion.choices[0].message.content || "";
+  const [caption, hashtags, hook] = result.split("\\n").map(line => line.split(":")[1]?.trim() || "");
+
+  return Response.json({ caption, hashtags, hook });
+}
